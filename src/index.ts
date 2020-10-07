@@ -57,6 +57,8 @@ client.on('message', (message) => {
 })
 
 client.on('guildMemberAdd', (member) => {
+  if (member.user?.bot) return
+
   member.roles.add(roles.guest as Role)
 })
 
