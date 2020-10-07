@@ -60,4 +60,8 @@ client.on('guildMemberAdd', (member) => {
   member.roles.add(roles.guest as Role)
 })
 
+client.on('error', (error: Error) => {
+  console.error(error)
+})
+
 client.login(TOKEN)
