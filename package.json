@@ -1,0 +1,24 @@
+{
+  "name": "Anchor",
+  "version": "1.0.0",
+  "description": "Server to do some work",
+  "main": "index.js",
+  "author": "Hiro Degawa(hxdegawa@gmail.com)",
+  "license": "MIT",
+  "scripts": {
+    "start": "node ./build/index.js",
+    "debug": "ts-node ./src/index.ts",
+    "compile": "tsc -p .",
+    "compile:test": "tsc -p . --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^14.11.4",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "discord.js": "^12.3.1",
+    "dotenv": "^8.2.0"
+  }
+}
