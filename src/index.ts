@@ -53,6 +53,9 @@ client.on('message', (message) => {
     message.member?.roles
       .remove(roles.guest as Role)
       .then((member) => member.roles.add(roles.verified as Role))
+      .catch((e) => {
+        console.log(e)
+      })
   }
 })
 
