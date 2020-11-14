@@ -1,4 +1,4 @@
-import { Client, Guild, Role, TextChannel } from 'discord.js'
+import { Client, Guild, GuildChannel, Role } from 'discord.js'
 import { config } from 'dotenv'
 
 config()
@@ -6,12 +6,20 @@ config()
 const client = new Client()
 const TOKEN = process.env.BOT_TOKEN
 
+interface ChannelID {
+  [key: string]: string
+}
+
 interface Channels {
-  [key: string]: TextChannel | undefined
+  [key: string]: GuildChannel | undefined
+}
+
+const channelIDs: ChannelID = {
+  introduce: '763330359965253642',
 }
 
 const channels: Channels = {
-  '🙋🏻│自己紹介': undefined,
+  introduce: undefined,
 }
 
 interface Roles {
@@ -28,7 +36,15 @@ client.on('ready', () => {
     (guild) => guild.name === 'Anchor'
   )
 
-  server?.channels.cache.forEach((channel: any) => {
+  server?.channels.cache.forEach((channel: GuildChannel) => {
+    Object.keys(channelIDs).forEach(async (key: string) => {
+      if (channel.id === channelIDs[key]) {
+        channels[key] = (await client.channels.fetch(
+          channelIDs[key]
+        )) as GuildChannel
+      }
+    })
+
     if (channel.name in channels) channels[channel.name] = channel
   })
 
