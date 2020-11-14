@@ -11,12 +11,7 @@ interface Channels {
 }
 
 const channels: Channels = {
-  general: undefined,
-  introduce: undefined,
-  announce: undefined,
-  random: undefined,
-  events: undefined,
-  ideas: undefined,
+  '🙋🏻│自己紹介': undefined,
 }
 
 interface Roles {
@@ -65,8 +60,6 @@ client.on('guildMemberAdd', (member) => {
   member.roles.add(roles.guest as Role)
 })
 
-client.on('error', (error: Error) => {
-  console.error(error)
-})
+client.on('error', console.error)
 
 client.login(TOKEN)
