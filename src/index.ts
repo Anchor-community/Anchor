@@ -22,8 +22,17 @@ const channels: Channels = {
   introduce: undefined,
 }
 
+interface RoleID {
+  [key: string]: string
+}
+
 interface Roles {
   [key: string]: Role | undefined
+}
+
+const roleIDs: RoleID = {
+  guest: '762911303827324939',
+  verified: '762911175397736459',
 }
 
 const roles: Roles = {
@@ -49,6 +58,12 @@ client.on('ready', () => {
   })
 
   server?.roles.cache.forEach((role: Role) => {
+    Object.keys(roleIDs).forEach(async (key: string) => {
+      if (role.id === roleIDs[key]) {
+        roles[key] = (await server.roles.fetch(roleIDs[key])) as Role
+      }
+    })
+
     if (role.name.toLocaleLowerCase() in roles)
       roles[role.name.toLocaleLowerCase()] = role
   })
