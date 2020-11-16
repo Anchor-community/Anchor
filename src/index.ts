@@ -5,6 +5,7 @@ config()
 
 const client = new Client()
 const TOKEN = process.env.BOT_TOKEN
+let server: Guild | undefined = undefined
 
 interface ChannelID {
   [key: string]: string
@@ -33,15 +34,23 @@ interface Roles {
 const roleIDs: RoleID = {
   guest: '762911303827324939',
   verified: '762911175397736459',
+  purged: '777870836002455564',
 }
 
 const roles: Roles = {
   guest: undefined,
   verified: undefined,
+  purged: undefined,
 }
 
-client.on('ready', () => {
-  const server: Guild | undefined = client.guilds.cache.find(
+interface StreakCounter {
+  [key: string]: string[]
+}
+
+const streak: StreakCounter = {}
+
+client.on('ready', async () => {
+  const server: Guild | undefined = await client.guilds.cache.find(
     (guild) => guild.name === 'Anchor'
   )
 
@@ -82,6 +91,25 @@ client.on('message', (message) => {
       .catch((e) => {
         console.log(e)
       })
+  }
+
+  if (message.member !== server?.owner) {
+    streak[message.author.id]
+      ? (streak[message.author.id] = [...streak[message.author.id]])
+      : (streak[message.author.id] = [])
+
+    if (streak[message.author.id].length >= 5) {
+      message.delete({reason: 'Spamming'})
+      message.member?.roles.add(roles.purged as Role)
+      setTimeout(() => {
+        message.member?.roles.remove(roles.purged as Role)
+      }, 10000)
+    } else {
+      streak[message.author.id].push(message.content)
+      setTimeout(() => {
+        streak[message.author.id].pop()
+      }, 5000)
+    }
   }
 })
 
