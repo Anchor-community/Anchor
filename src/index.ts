@@ -1,5 +1,5 @@
 import { config } from 'dotenv'
-import { Client, Guild, GuildChannel, Role } from 'discord.js'
+import { Client, Emoji, Guild, GuildChannel, Role } from 'discord.js'
 
 config()
 
@@ -117,6 +117,31 @@ client.on('message', (message) => {
       setTimeout(() => {
         streak[message.author.id].pop()
       }, 5000)
+    }
+  }
+  
+  // コマンド
+  if(message.member?.roles.cache.has(roleIDs.verified)) {
+    if(message.content.startsWith("ping")) message.channel.send("pong")
+    if(message.content.startsWith("/")) {
+      const args: string[] = message.content.slice(1).trim().split(/ +/)
+      switch(args[0]) {
+        case 'title':
+          if(!args[1] || args[3]) {
+            message.channel.send({
+              embed: {
+              color: 16757683,
+              title: ":information_source:使い方",
+              description: '`/title [name]` で入っているVCのタイトルを変更できます'
+            }})
+            return
+          }
+          message.guild?.channels.cache.filter(c => c.type == 'voice')
+            .filter(c => !!c.members.get(message.author.id))
+            .first()
+            ?.setName(args[2])
+            .then(async() => message.react('☑'))
+      }
     }
   }
 })
