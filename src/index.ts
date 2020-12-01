@@ -6,7 +6,7 @@ config()
 
 export let server: Guild | undefined = undefined
 
-// const TOKEN = process.env.BOT_TOKEN
+const TOKEN = process.env.BOT_TOKEN
 const client = new Client()
 
 interface ChannelID {
@@ -186,4 +186,4 @@ client.on('guildMemberAdd', (member) => {
 
 client.on('error', console.error)
 
-client.login("NzgyNTgyMTY3NjUzMDU2NTQy.X8OScA.K-g_u5dj8XmU4VvunFRgLFiC69Y")
+client.login(TOKEN)
