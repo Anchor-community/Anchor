@@ -124,7 +124,7 @@ client.on('message', (message) => {
   
   // コマンド
   // ウンコード
-  if(message.member?.roles.cache.has("782484108802523138")) {
+  if(message.member?.roles.cache.has(channelIDs.verified)) {
     if(message.content.startsWith("ping")) message.channel.send("pong")
     if(message.content.startsWith("/")) {
       const args: string[] = message.content.slice(1).trim().split(/ +/)
