@@ -13,22 +13,16 @@ const hasRole = (member: GuildMember, roleID: string): boolean => {
   return member.roles.cache.has(roleID)
 }
 
-interface ChannelMap {
-  [key: string]: GuildChannel | undefined
-}
-
 const channelIDMap: {
   [key: string]: string
 } = {
   introduce: '763330359965253642',
 }
 
-const channelMap: ChannelMap = {
+const channelMap: {
+  [key: string]: GuildChannel | undefined
+} = {
   introduce: undefined,
-}
-
-interface Roles {
-  [key: string]: Role | undefined
 }
 
 const roleIDMap: {
@@ -39,11 +33,9 @@ const roleIDMap: {
   purged: '777870836002455564',
 }
 
-const roles: Roles = {
-  guest: undefined,
-  verified: undefined,
-  purged: undefined,
-}
+const roles: {
+  [key: string]: Role | undefined
+} = {}
 
 interface StreakCounter {
   [key: string]: string[]
