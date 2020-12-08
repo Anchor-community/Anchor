@@ -31,8 +31,8 @@ interface Roles {
   [key: string]: Role | undefined
 }
 
-const roleIDMap: { 
-  [key: string]: string 
+const roleIDMap: {
+  [key: string]: string
 } = {
   guest: '762911303827324939',
   verified: '762911175397736459',
@@ -50,7 +50,7 @@ interface StreakCounter {
 }
 
 const streak: StreakCounter = {}
-let vcChangeCount: Map<Snowflake,number> = new Map()
+let vcChangeCount: Map<Snowflake, number> = new Map()
 
 client.on('ready', async () => {
   server = await client.guilds.cache.find((guild) => guild.name === 'Anchor')
@@ -124,27 +124,28 @@ client.on('message', (message) => {
       }, 5000)
     }
   }
-  
+
   // コマンド
   // ウンコード
-  if(message.member && hasRole(message.member, roleIDMap.verified)) {
-    if(message.content.startsWith("ping")) message.channel.send("pong")
-    if(message.content.startsWith("/")) {
+  if (message.member && hasRole(message.member, roleIDMap.verified)) {
+    if (message.content.startsWith("ping")) message.channel.send("pong")
+    if (message.content.startsWith("/")) {
       const args: string[] = message.content.slice(1).trim().split(/ +/)
-      switch(args[0]) {
+      switch (args[0]) {
         case 'title':
-          if(!args[1] || args[2]) {
+          if (!args[1] || args[2]) {
             message.channel.send({
               embed: {
-              color: 16757683,
-              title: ":information_source: 使い方",
-              description: '`/title [name]` で入っているVCのタイトルを変更できます\n'+
-                'このサーバのステータスは ' 
-                + (vcChangeCount.get(guild.id) as number >= 2 
-                  ? "レートリミットにかかっている可能性があります。" 
-                  : "大丈夫です。") 
-            }})
-              .then(msg => setTimeout(() => {msg.delete(); message.delete()},5000))
+                color: 16757683,
+                title: ":information_source: 使い方",
+                description: '`/title [name]` で入っているVCのタイトルを変更できます\n' +
+                  'このサーバのステータスは '
+                  + (vcChangeCount.get(guild.id) as number >= 2
+                    ? "レートリミットにかかっている可能性があります。"
+                    : "大丈夫です。")
+              }
+            })
+              .then(msg => setTimeout(() => { msg.delete(); message.delete() }, 5000))
             return
           }
 
@@ -153,19 +154,19 @@ client.on('message', (message) => {
             .filter(c => !!c.members.get(message.author.id))
             .first()
 
-          if(vcChangeCount.get(guild.id) as number >= 2){
-            message.channel.send("レートリミットにかかっている可能性があります").then(msg => setTimeout(() => {msg.delete(); message.delete()},5000))
+          if (vcChangeCount.get(guild.id) as number >= 2) {
+            message.channel.send("レートリミットにかかっている可能性があります").then(msg => setTimeout(() => { msg.delete(); message.delete() }, 5000))
             return
           }
 
           cnl?.setName(args[1])
-            .then(async() => {
+            .then(async () => {
               message.react('☑')
-              setTimeout(()=> {
+              setTimeout(() => {
                 message.deletable ? message.delete() : {}
-              },3000)
+              }, 3000)
               //ウンコード
-              !vcChangeCount.has(guild.id) ? 
+              !vcChangeCount.has(guild.id) ?
                 vcChangeCount.set(guild.id, 1)
                 : vcChangeCount.set(guild.id, vcChangeCount.get(guild.id) as number + 1)
               setTimeout(() => {
