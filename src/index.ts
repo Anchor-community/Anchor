@@ -119,7 +119,7 @@ client.on('message', (message) => {
 
   // コマンド
   // ウンコード
-  if (message.member && hasRole(message.member, roleIDMap.verified)) {
+  if (hasRole(member, roleIDMap.verified)) {
     if (message.content.startsWith("ping")) message.channel.send("pong")
     if (message.content.startsWith("/")) {
       const args: string[] = message.content.slice(1).trim().split(/ +/)
