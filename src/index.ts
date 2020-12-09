@@ -9,7 +9,7 @@ export let server: Guild | undefined = undefined
 const TOKEN = process.env.BOT_TOKEN
 const client = new Client()
 
-const hasRole = (member: GuildMember, roleID: string): boolean => {
+export const hasRole = (member: GuildMember, roleID: string): boolean => {
   return member.roles.cache.has(roleID)
 }
 
