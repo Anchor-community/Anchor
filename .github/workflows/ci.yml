@@ -14,10 +14,10 @@ jobs:
     - uses: actions/setup-node@v2-beta
       with:
         node-version: '14.15.1'
-    - name: clean install dependencies and build
-      run: |
-       npm install
-       npm build
+    - name: clean install dependencies
+      run: npm install
+    - name: build
+      run: npm build
     - name: run tests
       run: npm test
     - uses: actions/github-script@0.8.0
