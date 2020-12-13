@@ -1,6 +1,3 @@
-
-describe("", () => {
-    test("success full", () => {
-        expect(true).toEqual(true)
-    })
+test("successful", () => {
+    expect(true).toEqual(true)
 })
