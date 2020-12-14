@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '14.15.1'
+    - name: clean install dependencies
+      run: npm install
+    - name: build
+      run: npm build
+    - name: run tests
+      run: npm test
+    - uses: actions/github-script@0.8.0
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '<img src=https://media.giphy.com/media/tIeCLkB8geYtW/giphy.gif width=50% />'
+          })

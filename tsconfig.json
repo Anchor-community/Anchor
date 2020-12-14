@@ -5,6 +5,7 @@
         "module": "CommonJS",
         "outDir": "./build",
         "rootDir": "./src",
+        "baseUrl": "./src",
         "removeComments": true,
         "strict": true,
         "noImplicitThis": true,
@@ -17,6 +18,9 @@
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "pretty": true,
-        "newLine": "CRLF"
+        "newLine": "CRLF",
+        "paths": {
+            "~/*": ["*"]
+        },
     }
 }
