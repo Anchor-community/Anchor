@@ -1,17 +1,15 @@
 import { config } from 'dotenv'
-import { Client, Guild, GuildChannel, GuildMember, Role, Snowflake } from 'discord.js'
+import { Client, Guild, GuildChannel, GuildMember, GuildMemberRoleManager, Message, Role, RoleManager, Snowflake, } from 'discord.js'
 import { setTimeout } from 'timers'
 
 config()
 
-export let server: Guild | undefined = undefined
+export let guild: Guild | undefined = undefined
 
 const TOKEN = process.env.BOT_TOKEN
 const client = new Client()
 
-const hasRole = (member: GuildMember, roleID: string): boolean => {
-  return member.roles.cache.has(roleID)
-}
+const guildName = 'Anchor'
 
 const channelIDMap: {
   [key: string]: string
@@ -25,30 +23,60 @@ const channelMap: {
   introduce: undefined,
 }
 
-const roleIDMap: {
-  [key: string]: string
-} = {
-  guest: '762911303827324939',
-  verified: '762911175397736459',
-  purged: '777870836002455564',
+const roleNames = ['guest', 'verified', 'purged'] as const
+
+type RoleName = typeof roleNames[number]
+
+type RoleMap = {
+  [key in RoleName]: Role
 }
 
-const roles: {
-  [key: string]: Role | undefined
-} = {}
+let roleMap: RoleMap
 
 interface StreakCounter {
   [key: string]: string[]
 }
 
+const findRole = (roleManager: RoleManager | GuildMemberRoleManager, name: RoleName): Role | undefined => {
+  return roleManager.cache.find(role => role.name === name)
+}
+
+const fetchAndMappingRoles = async (guild: Guild, names: readonly RoleName[]): Promise<RoleMap> => {
+  const roles = await guild.roles.fetch()
+  return Object.fromEntries(names.map((name: RoleName) => {
+    const role = findRole(roles, name)
+    if (!role) throw `not found ${name} from ${guildName}`
+    return [name, role]
+  })) as RoleMap
+}
+
+const hasRole = (member: GuildMember, role: RoleName) => findRole(member.roles, role)
+
 const streak: StreakCounter = {}
 let vcChangeCount: Map<Snowflake, number> = new Map()
 
-client.on('ready', async () => {
-  server = await client.guilds.cache.find((guild) => guild.name === 'Anchor')
-  if (!server) return
+const eventBuilder = (message: Message, allowRole: RoleName, handler: (member: GuildMember) => void) => {
+  if (!message.member || !hasRole(message.member, allowRole)) return
+  handler(message.member)
+}
 
-  server.channels.cache.forEach((channel: GuildChannel) => {
+const handleGrantAuthority = (message: Message) =>
+  eventBuilder(message, 'guest', (member) => {
+    if (message.channel === channelMap.introduce) {
+      member.roles
+        .remove(roleMap.guest as Role)
+        .then((member) => member.roles.add(roleMap.verified as Role))
+        .catch((e) => {
+          console.log(e)
+        })
+    }
+  })
+
+client.on('ready', async () => {
+  guild = client.guilds.cache.find((guild) => guild.name === guildName)
+  if (!guild) return
+  roleMap = await fetchAndMappingRoles(guild, roleNames)
+  guild.channels.cache.forEach((channel: GuildChannel) => {
     Object.keys(channelIDMap).forEach(async (key: string) => {
       if (channel.id === channelIDMap[key]) {
         channelMap[key] = (await client.channels.fetch(
@@ -59,55 +87,25 @@ client.on('ready', async () => {
 
     if (channel.name in channelMap) channelMap[channel.name] = channel
   })
-
-  server.roles.cache.forEach((role: Role) => {
-    Object.keys(roleIDMap).forEach(async (key: string) => {
-      if (role.id === roleIDMap[key] && server) {
-        roles[key] = (await server.roles.fetch(roleIDMap[key])) as Role
-      }
-    })
-
-    if (role.name.toLocaleLowerCase() in roles)
-      roles[role.name.toLocaleLowerCase()] = role
-  })
 })
 
 client.on('message', (message) => {
   if (message.author.bot) return
-  if (!message.guild || !message.member) return
+  if (!message.guild || !message.member || !roleMap) return
   const guild = message.guild
   const member = message.member
-  if (message.channel === channelMap.introduce) {
-    console.log(
-      'message.channel === channelMap.introduce',
-      message.channel === channelMap.introduce
-    )
-    if (!member.roles.cache.find((role) => role === roles.guest))
-      return
+  handleGrantAuthority(message)
 
-    console.log(
-      '!member.roles.cache.find((role) => role === roles.guest)',
-      !member.roles.cache.find((role) => role === roles.guest)
-    )
-
-    member.roles
-      .remove(roles.guest as Role)
-      .then((member) => member.roles.add(roles.verified as Role))
-      .catch((e) => {
-        console.log(e)
-      })
-  }
-
-  if (member !== server?.owner) {
+  if (member !== guild?.owner) {
     streak[message.author.id]
       ? (streak[message.author.id] = [...streak[message.author.id]])
       : (streak[message.author.id] = [])
 
     if (streak[message.author.id].length >= 5) {
       message.delete({ reason: 'Spamming' })
-      member.roles.add(roles.purged as Role)
+      member.roles.add(roleMap.purged as Role)
       setTimeout(() => {
-        member.roles.remove(roles.purged as Role)
+        member.roles.remove(roleMap.purged as Role)
       }, 10000)
     } else {
       streak[message.author.id].push(message.content)
@@ -119,7 +117,7 @@ client.on('message', (message) => {
 
   // コマンド
   // ウンコード
-  if (hasRole(member, roleIDMap.verified)) {
+  if (hasRole(member, 'verified')) {
     if (message.content.startsWith("ping")) message.channel.send("pong")
     if (message.content.startsWith("/")) {
       const args: string[] = message.content.slice(1).trim().split(/ +/)
@@ -178,8 +176,9 @@ client.on('message', (message) => {
 
 client.on('guildMemberAdd', (member) => {
   if (member.user?.bot) return
-
-  member.roles.add(roles.guest as Role)
+  if (roleMap?.guest) {
+    member.roles.add(roleMap.guest as Role)
+  }
 })
 
 client.on('error', console.error)
